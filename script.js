@@ -20,13 +20,20 @@ async function checkStatus() {
     );
 
     // Parse the JSON response
-    const data = await response.json();
+    let data = await response.json();
+
+    // If data is wrapped in a 'body' field as a string, parse it again
+    if (typeof data.body === "string") {
+      data = JSON.parse(data.body);
+    }
 
     // Display the result based on the API response
-    if (data.status) {
+    if (data.status && data.message) {
       resultDiv.innerHTML = `<div class="alert alert-success">Status Code: ${data.status}<br>${data.message}</div>`;
-    } else {
+    } else if (data.error) {
       resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${data.error}</div>`;
+    } else {
+      resultDiv.innerHTML = `<div class="alert alert-danger">Error: Unexpected response format.</div>`;
     }
   } catch (error) {
     // Display an error message if there is an issue with the fetch request
